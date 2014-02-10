@@ -24,21 +24,21 @@ var Pipeline = (function() {
         pending = Array.prototype.slice.call(this.filters);
 
     if (done) {
-      // add an error event listener since if there is no listener the default action is to print a stack trace and exit the program
-      emitter.once('error', function() { });
+      // wireup the optional `done` callback with both `error` and `end` event listeners
+      // (if there is no error istener, the default action is to print a stack trace and exit the program)
+      emitter.once('error', function(err) { done(err); });
+      emitter.once('end', function(result) { done(null, result); });
     }
 
     var continueExecution = function continueExecution(err, result) {
       // exit pipeline with an error
       if (err) {
-        emitter.emit('error', err);
-        return done && done(err);
+        return emitter.emit('error', err);
       }
  
       // completed, with success, or exit early
       if (pending.length === 0 || result === Pipeline.break) {
-        emitter.emit('end', result);
-        return done && done(null, result);
+        return emitter.emit('end', result);
       }
  
       // take next filter from pending list, and continue execution
