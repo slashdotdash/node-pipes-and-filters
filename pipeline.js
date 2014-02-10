@@ -24,10 +24,7 @@ var Pipeline = (function() {
         pending = Array.prototype.slice.call(this.filters);
 
     if (done) {
-      // wireup the optional `done` callback with both `error` and `end` event listeners
-      // (if there is no error istener, the default action is to print a stack trace and exit the program)
-      emitter.once('error', function(err) { done(err); });
-      emitter.once('end', function(result) { done(null, result); });
+      this.wireupEvents(done);
     }
 
     var continueExecution = function continueExecution(err, result) {
@@ -53,6 +50,27 @@ var Pipeline = (function() {
     process.nextTick(function() {
       continueExecution(null, input);
     });
+  };
+
+  // Wireup the optional `done` callback with both `error` and `end` event listeners
+  // (if there is no error istener, the default action is to print a stack trace and exit the program).
+  Pipeline.prototype.wireupEvents = function(done) {
+    var emitter = this;
+
+    var error = function(err) {
+      emitter.removeListener('error', error);
+      emitter.removeListener('end', end);
+      done(err);
+    };
+
+    var end = function(result) {
+      emitter.removeListener('error', error);
+      emitter.removeListener('end', end);
+      done(null, result);
+    };
+
+    this.once('error', error);
+    this.once('end', end);
   };
 
   Pipeline.break = {};
