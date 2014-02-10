@@ -87,9 +87,9 @@ describe('Pipeline', function() {
 
       beforeEach(function() {
         // break
-        pipeline.use(Pipeline.breakIf(function() {
+        pipeline.breakIf(function() {
           return true;
-        }));
+        });
 
         pipeline.use(function(input, next) {
           wasCalled = true;
@@ -110,6 +110,25 @@ describe('Pipeline', function() {
           expect(wasCalled).to.be.false;
           done();
         });
+      });
+    });
+
+    describe('pipeline chaining', function() {
+      it('should allow pipeline to be created and executed fluently', function(done) {
+        Pipeline.create('test')
+          .use(function(input, next) {
+            input.wasCalled = true;
+            next(null, input);
+          })
+          .breakIf(function() {
+            return false;  // don't exit
+          })
+          .execute({}, function(err, result) {
+            expect(err).to.be.null;
+            expect(result).not.to.be.null;
+            expect(result.wasCalled).to.be.true;
+            done();
+          });
       });
     });
   });

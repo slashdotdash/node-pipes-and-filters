@@ -14,10 +14,15 @@ var Pipeline = (function() {
   // Adds a filter function to the pipeline chain.
   Pipeline.prototype.use = function(filter, context) {
     this.filters.push({ fn: filter, context: context });
-
     return this;
   };
- 
+  
+  // Early exit the pipeline if the given predicate evaluates to true.
+  Pipeline.prototype.breakIf = function(predicate) {
+    this.use(Pipeline.breakIf(predicate));
+    return this;
+  };
+
   // Start the execution of the pipeline.
   Pipeline.prototype.execute = function(input, done) {
     var emitter = this,
@@ -73,23 +78,27 @@ var Pipeline = (function() {
     this.once('end', end);
   };
 
+  // Break out of the pipeline processing comparison value
   Pipeline.break = {};
- 
+  
+  // Factory method to create an exit early filter function 
+  Pipeline.breakIf = function(predicate) {
+    return function(input, next) {
+      // exit out of the pipeline if the predicate returns true
+      if (predicate(input)) {
+        return next(null, Pipeline.break);
+      }
+
+      next(null, input);
+    };
+  };
+
   return Pipeline;
 })();
 
 exports.break = Pipeline.break;
 
-exports.breakIf = function(predicate) {
-  return function(input, next) {
-    // exit out of the pipeline if the predicate returns true
-    if (predicate(input)) {
-      return next(null, Pipeline.break);
-    }
-
-    next(null, input);
-  };
-};
+exports.breakIf = Pipeline.breakIf;
 
 exports.create = function(name) {
   return new Pipeline(name);
