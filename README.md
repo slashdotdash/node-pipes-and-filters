@@ -61,17 +61,42 @@ The pipeline will stop processing on any filter error.
 
 #### 7a. Execute the pipeline for a given input.
 
-	var input = {};
-
 	pipeline.execute(input);
 
-#### 7b. Execute the pipeline with a Node-style error/result callback.
-	
-	pipeline.execute(input, function(err, result) {
-		if (err) {
-			console.error(err);
-			return;
-		}
+With this style, an `error` event handler is required. Otherwise the default action on any filter error is to print a stack trace and exit the program.
 
-		console.log('completed', result);
+#### 7b. Execute the pipeline with a Node-style error/result callback.
+
+	pipeline.execute(input, function(err, result) {
+	  if (err) {
+	    console.error(err);
+	    return;
+	  }
+
+	  console.log('completed', result);
 	});
+
+With this style, an `error` and/or `end` event handler are not required.
+
+### Early exit
+
+You may exit early from a pipeline by passing `Pipeline.break` to the next callback. This will immediately stop execution and prevent any further filters from being called.
+
+   	pipeline.use(function(input, next) {
+   		// exit the pipeline
+   		next(null, Pipeline.break);
+	});
+
+For convenience, you may use `Pipeline.breakIf` passing in a predicate function that returns true to exit early.
+
+	pipeline.use(Pipeline.breakIf(function(input) {
+      return true;  // exit early
+  	}));
+
+ Note, you should check the result in the complete event and/or callback.
+
+ 	pipeline.execute(function(err, result) {
+ 	  if (result === Pipeline.break) {
+ 	    // pipeline exited early
+ 	  }
+ 	});

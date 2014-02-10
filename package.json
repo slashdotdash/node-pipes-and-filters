@@ -1,6 +1,6 @@
 {
   "name": "pipes-and-filters",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Pipes and Filters for Node.js to divide a larger processing task into a sequence of smaller, independent processing steps (Filters) that are connected by channels (Pipes).",
   "main": "pipeline.js",
   "scripts": {

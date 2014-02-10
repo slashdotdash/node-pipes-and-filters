@@ -62,6 +62,17 @@ var Pipeline = (function() {
 
 exports.break = Pipeline.break;
 
+exports.breakIf = function(predicate) {
+  return function(input, next) {
+    // exit out of the pipeline if the predicate returns true
+    if (predicate(input)) {
+      return next(null, Pipeline.break);
+    }
+
+    next(null, input);
+  };
+};
+
 exports.create = function(name) {
   return new Pipeline(name);
 };

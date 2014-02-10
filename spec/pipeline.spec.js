@@ -81,5 +81,36 @@ describe('Pipeline', function() {
         });
       });
     });
+
+    describe('break early', function() {
+      var wasCalled = false;
+
+      beforeEach(function() {
+        // break
+        pipeline.use(Pipeline.breakIf(function() {
+          return true;
+        }));
+
+        pipeline.use(function(input, next) {
+          wasCalled = true;
+          next(null, input);
+        });
+      });
+
+      it('should invoke callback with break result', function(done) {
+        pipeline.execute({}, function(err, result) {
+          expect(err).to.be.null;
+          expect(result).to.equal(Pipeline.break);
+          done();
+        });
+      });
+
+      it('should not execute subsequent filters after break', function(done) {
+        pipeline.execute({}, function() {
+          expect(wasCalled).to.be.false;
+          done();
+        });
+      });
+    });
   });
 });
