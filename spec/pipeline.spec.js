@@ -1,5 +1,9 @@
-var expect = require('chai').expect,
+var chai = require('chai'),
+    expect = chai.expect,
+    spies = require('chai-spies'),
     Pipeline = require('../pipeline');
+
+chai.use(spies);
 
 describe('Pipeline', function() {
   it('should create a named Pipeline', function() {
@@ -97,19 +101,28 @@ describe('Pipeline', function() {
         });
       });
 
-      it('should invoke callback with break result', function(done) {
-        pipeline.execute({}, function(err, result) {
-          expect(err).to.be.null;
-          expect(result).to.equal(Pipeline.break);
+      it('should not invoke callback with break result', function(done) {
+        var spy = chai.spy(function() { });
+        
+        pipeline.once('break', function() {
+          expect(spy).not.to.have.been.called();
           done();
         });
+
+        pipeline.execute({}, spy);
+      });
+
+      it('should invoke "break" event', function(done) {
+        pipeline.once('break', done);
+        pipeline.execute({});
       });
 
       it('should not execute subsequent filters after break', function(done) {
-        pipeline.execute({}, function() {
+        pipeline.once('break', function() {
           expect(wasCalled).to.be.false;
           done();
         });
+        pipeline.execute({});
       });
     });
 

@@ -1,6 +1,6 @@
 {
   "name": "pipes-and-filters",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Pipes and Filters for Node.js to divide a larger processing task into a sequence of smaller, independent processing steps (Filters) that are connected by channels (Pipes).",
   "main": "pipeline.js",
   "scripts": {
@@ -25,10 +25,11 @@
   },
   "homepage": "https://github.com/slashdotdash/node-pipes-and-filters",
   "devDependencies": {
-    "mocha": "~1.17.1",
-    "gulp-mocha": "~0.4.1",
-    "gulp": "~3.5.2",
     "chai": "~1.9.0",
-    "gulp-jshint": "~1.4.0"
+    "chai-spies": "~0.5.1",
+    "gulp": "~3.5.2",
+    "gulp-jshint": "~1.4.0",
+    "gulp-mocha": "~0.4.1",    
+    "mocha": "~1.17.1"
   }
 }

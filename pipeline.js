@@ -37,9 +37,14 @@ var Pipeline = (function() {
       if (err) {
         return emitter.emit('error', err);
       }
- 
+      
+      // exit early
+      if (result === Pipeline.break) {
+        return emitter.emit('break');
+      }
+
       // completed, with success, or exit early
-      if (pending.length === 0 || result === Pipeline.break) {
+      if (pending.length === 0) {
         return emitter.emit('end', result);
       }
  
@@ -62,20 +67,25 @@ var Pipeline = (function() {
   Pipeline.prototype.wireupEvents = function(done) {
     var emitter = this;
 
-    var error = function(err) {
+    var removeListeners = function() {
       emitter.removeListener('error', error);
       emitter.removeListener('end', end);
+      emitter.removeListener('break', removeListeners);
+    };
+
+    var error = function(err) {
+      removeListeners();
       done(err);
     };
 
     var end = function(result) {
-      emitter.removeListener('error', error);
-      emitter.removeListener('end', end);
+      removeListeners();
       done(null, result);
     };
 
     this.once('error', error);
     this.once('end', end);
+    this.once('break', removeListeners);
   };
 
   // Break out of the pipeline processing comparison value
