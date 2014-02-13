@@ -99,18 +99,16 @@ You may exit early from a pipeline by passing `Pipeline.break` to the next callb
 
 For convenience, you may use `Pipeline.breakIf` passing in a predicate function that returns true to exit early.
 
-	pipeline.use(Pipeline.breakIf(function(input) {
-      return true;  // exit early
-  	}));
+	Pipeline.breakIf(function(input) {
+		return true;  // exit early
+	});
 
- Note, you should check the result in the complete event and/or callback.
+Note, if you want to be notified of a break in the pipeline you will need to add an event handler to the `break` event.
 
- 	pipeline.execute(function(err, result) {
- 	  if (result === Pipeline.break) {
- 	    // pipeline exited early
- 	  }
- 	});
- 	
+	pipeline.on('break', function() {
+		console.log('Pipeline exited early');
+	});
+
 ## Alternatives
 
 Another option is to use the `pipeline` function from  [event-stream](https://github.com/dominictarr/event-stream#pipeline-stream1streamn). This can be combined with `map` to create a stream from an asynchronous function. 
