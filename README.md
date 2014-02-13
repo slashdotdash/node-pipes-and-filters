@@ -2,7 +2,17 @@
 
 Use the [Pipes and Filters](http://www.eaipatterns.com/PipesAndFilters.html) architectural style to divide a larger processing task into a sequence of smaller, independent processing steps (Filters) that are connected by channels (Pipes).
 
-> Each filter exposes a very simple interface: it receives messages on the inbound pipe, processes the message, and publishes the results to the outbound pipe. The pipe connects one filter to the next, sending output messages from one filter to the next. Because all component use the same external interface they can be composed into different solutions by connecting the components to different pipes. We can add new filters, omit existing ones or rearrange them into a new sequence -- all without having to change the filters themselves. The connection between filter and pipe is sometimes called port. In the basic form, each filter component has one input port and one output port.
+> Each filter exposes a very simple interface: it receives messages on the inbound pipe, processes the message, and publishes the results to the outbound pipe. 
+
+> The pipe connects one filter to the next, sending output messages from one filter to the next. Because all component use the same external interface they can be composed into different solutions by connecting the components to different pipes. 
+
+> We can add new filters, omit existing ones or rearrange them into a new sequence -- all without having to change the filters themselves. The connection between filter and pipe is sometimes called port. In the basic form, each filter component has one input port and one output port.
+
+## What about native Node streams?
+
+Node's core [Stream](http://nodejs.org/api/stream.html) module follows this same basic idea. Filters are essentially [Transform](http://nodejs.org/api/stream.html#stream_class_stream_transform_1) streams, that you would `.pipe()` together to form a pipeline. 
+
+The aim of this library is to provide a much *simpler* interface due to having a limited feature set. If you are confident using Node's Stream API you can achieve a similar result.
 
 ## Usage
 
@@ -41,7 +51,7 @@ Install the `pipes-and-filters` package.
 	pipeline.use(authenticate);
 	pipeline.use(deDuplicate);
 
-Youn may optionally provide the context when the function is called.
+You may optionally provide the context when the function is called.
 
 	pipeline.use(foo.filter, foo)
 
@@ -100,3 +110,17 @@ For convenience, you may use `Pipeline.breakIf` passing in a predicate function 
  	    // pipeline exited early
  	  }
  	});
+ 	
+## Alternatives
+
+Another option is to use the `pipeline` function from  [event-stream](https://github.com/dominictarr/event-stream#pipeline-stream1streamn). This can be combined with `map` to create a stream from an asynchronous function. 
+
+ 	var es = require('event-stream');
+  
+ 	es.pipeline(
+ 	  es.map(decrypt),
+ 	  es.map(authenticate),
+ 	  es.map(deDuplicate)
+ 	);
+ 	
+Enable `objectMode` for your streams to make them behave as a stream of objects.
